@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        #gameCanvas {
+            border: 2px solid black;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #playAgainButton {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #quitButton {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="300" height="300"></canvas>
+<div id="message"></div>
+<button id="playAgainButton" style="display:none;">Play Again</button>
+<button id="quitButton" style="display:none;">Quit</button>
+
+<script>
+// Get canvas and context
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Initialize game variables
+const board = [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+];
+let currentPlayer = "X";
+let gameOver = false;
+let winner = null;
+let gameActive = true;  // Variable to track if the game is active
+
+// Draw the game board
+function drawBoard() {
+    if (!gameActive) return;  // If the game is not active, stop drawing
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+
+    // Draw the grid
+    ctx.moveTo(100, 0);
+    ctx.lineTo(100, 300);
+    ctx.moveTo(200, 0);
+    ctx.lineTo(200, 300);
+    ctx.moveTo(0, 100);
+    ctx.lineTo(300, 100);
+    ctx.moveTo(0, 200);
+    ctx.lineTo(300, 200);
+
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Draw the X's and O's
+    for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+            const cell = board[row][col];
+            if (cell) {
+                ctx.font = "50px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                // Change color and size based on winner
+                if (gameOver) {
+                    if (cell === "X") {
+                        ctx.fillStyle = "red";
+                        ctx.font = "70px Arial";
+                    } else if (cell === "O") {
+                        ctx.fillStyle = "blue";
+                        ctx.font = "70px Arial";
+                    }
+                } else {
+                    ctx.fillStyle = cell === "X" ? "black" : "black";
+                }
+
+                ctx.fillText(cell, col * 100 + 50, row * 100 + 50);
+            }
+        }
+    }
+}
+
+// Check if a player has won
+function checkWinner() {
+    for (let i = 0; i < 3; i++) {
+        if (board[i][0] && board[i][0] === board[i][1] && board[i][1] === board[i][2]) return board[i][0];
+        if (board[0][i] && board[0][i] === board[1][i] && board[1][i] === board[2][i]) return board[0][i];
+    }
+    if (board[0][0] && board[0][0] === board[1][1] && board[1][1] === board[2][2]) return board[0][0];
+    if (board[0][2] && board[0][2] === board[1][1] && board[1][1] === board[2][0]) return board[0][2];
+    
+    return null;
+}
+
+// Handle player clicks
+canvas.addEventListener("click", function (e) {
+    if (!gameActive || gameOver) return;  // Prevent click if the game is not active or over
+
+    const x = e.offsetX;
+    const y = e.offsetY;
+    const row = Math.floor(y / 100);
+    const col = Math.floor(x / 100);
+
+    // If the cell is empty, place the player's mark
+    if (!board[row][col]) {
+        board[row][col] = currentPlayer;
+        drawBoard();
+
+        // Check for winner
+        winner = checkWinner();
+        if (winner) {
+            gameOver = true;
+            document.getElementById("message").innerText = `${winner} wins!`;
+            document.getElementById("playAgainButton").style.display = "block";
+            document.getElementById("quitButton").style.display = "block";
+        } else if (board.flat().every(cell => cell)) {
+            // Check for draw
+            gameOver = true;
+            document.getElementById("message").innerText = "It's a draw!";
+            document.getElementById("playAgainButton").style.display = "block";
+            document.getElementById("quitButton").style.display = "block";
+        } else {
+            // Switch players
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+        }
+    }
+});
+
+// Play Again button click event
+document.getElementById("playAgainButton").addEventListener("click", function() {
+    // Reset the game
+    board.forEach(row => row.fill(""));
+    gameOver = false;
+    currentPlayer = "X";
+    winner = null;
+    gameActive = true;  // Reactivate the game
+    drawBoard();
+    document.getElementById("message").innerText = "";
+    document.getElementById("playAgainButton").style.display = "none";
+    document.getElementById("quitButton").style.display = "none";
+});
+
+// Quit button click event
+document.getElementById("quitButton").addEventListener("click", function() {
+    // Redirect to a different page (for example, home page)
+    window.location.href = "https://www.example.com";  // Replace with the URL you want to redirect to, or
+    // window.close(); // If you want to close the current browser tab
+});
+
+// Initial drawing of the board
+drawBoard();
+</script>
+
+</body>
+</html>
